@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from .whitelist import is_whitelisted
-import asyncio
 
 
 def get_steam_install_path():
@@ -32,7 +31,7 @@ def get_steam_libraries(steam_path):
     return libraries
 
 
-async def find_nvngx_dlss_dll(library_paths, launcher_name):
+def find_nvngx_dlss_dll(library_paths, launcher_name):
     dll_paths = []
     for library_path in library_paths:
         for root, _, files in os.walk(library_path):
@@ -43,7 +42,6 @@ async def find_nvngx_dlss_dll(library_paths, launcher_name):
                     dll_paths.append(dll_path)
                 else:
                     print(f"Skipped whitelisted game in {launcher_name}: {dll_path}")
-            await asyncio.sleep(0)  # Yield control to allow other tasks to run
     return dll_paths
 
 
@@ -52,7 +50,7 @@ def get_user_input(prompt):
     return None if user_input.lower() in ["n/a", ""] else user_input
 
 
-async def get_ea_games():
+def get_ea_games():
     ea_path = get_user_input(
         "Please enter the path for EA games or press Enter to skip: "
     )
@@ -78,14 +76,14 @@ def get_ubisoft_install_path():
         return None
 
 
-async def get_ubisoft_games(ubisoft_path):
+def get_ubisoft_games(ubisoft_path):
     ubisoft_games_path = Path(ubisoft_path) / "games"
     if not ubisoft_games_path.exists():
         return []
     return [ubisoft_games_path]
 
 
-async def get_epic_games():
+def get_epic_games():
     epic_path = get_user_input(
         "Please enter the path for Epic Games or press Enter to skip: "
     )
@@ -98,7 +96,7 @@ async def get_epic_games():
     return [epic_games_path]
 
 
-async def get_gog_games():
+def get_gog_games():
     gog_path = get_user_input(
         "Please enter the path for GOG games or press Enter to skip: "
     )
@@ -111,7 +109,7 @@ async def get_gog_games():
     return [gog_games_path]
 
 
-async def get_battlenet_games():
+def get_battlenet_games():
     battlenet_path = get_user_input(
         "Please enter the path for Battle.net games or press Enter to skip: "
     )
@@ -124,7 +122,7 @@ async def get_battlenet_games():
     return [battlenet_games_path]
 
 
-async def find_all_dlss_dlls():
+def find_all_dlss_dlls():
     all_dll_paths = {
         "Steam": [],
         "EA Launcher": [],
@@ -137,36 +135,32 @@ async def find_all_dlss_dlls():
     steam_path = get_steam_install_path()
     if steam_path:
         steam_libraries = get_steam_libraries(steam_path)
-        all_dll_paths["Steam"] = await find_nvngx_dlss_dll(steam_libraries, "Steam")
+        all_dll_paths["Steam"] = find_nvngx_dlss_dll(steam_libraries, "Steam")
 
-    ea_games = await get_ea_games()
+    ea_games = get_ea_games()
     if ea_games:
-        all_dll_paths["EA Launcher"] = await find_nvngx_dlss_dll(
-            ea_games, "EA Launcher"
-        )
+        all_dll_paths["EA Launcher"] = find_nvngx_dlss_dll(ea_games, "EA Launcher")
 
     ubisoft_path = get_ubisoft_install_path()
     if ubisoft_path:
-        ubisoft_games = await get_ubisoft_games(ubisoft_path)
-        all_dll_paths["Ubisoft Launcher"] = await find_nvngx_dlss_dll(
+        ubisoft_games = get_ubisoft_games(ubisoft_path)
+        all_dll_paths["Ubisoft Launcher"] = find_nvngx_dlss_dll(
             ubisoft_games, "Ubisoft Launcher"
         )
 
-    epic_games = await get_epic_games()
+    epic_games = get_epic_games()
     if epic_games:
-        all_dll_paths["Epic Games Launcher"] = await find_nvngx_dlss_dll(
+        all_dll_paths["Epic Games Launcher"] = find_nvngx_dlss_dll(
             epic_games, "Epic Games Launcher"
         )
 
-    gog_games = await get_gog_games()
+    gog_games = get_gog_games()
     if gog_games:
-        all_dll_paths["GOG Launcher"] = await find_nvngx_dlss_dll(
-            gog_games, "GOG Launcher"
-        )
+        all_dll_paths["GOG Launcher"] = find_nvngx_dlss_dll(gog_games, "GOG Launcher")
 
-    battlenet_games = await get_battlenet_games()
+    battlenet_games = get_battlenet_games()
     if battlenet_games:
-        all_dll_paths["Battle.net Launcher"] = await find_nvngx_dlss_dll(
+        all_dll_paths["Battle.net Launcher"] = find_nvngx_dlss_dll(
             battlenet_games, "Battle.net Launcher"
         )
 
@@ -197,7 +191,6 @@ async def find_all_dlss_dlls():
         print("Found DLLs in multiple categories:")
         for dll in uncategorized:
             print(f" - {dll}")
-            # Remove from all categories except the first one it appears in
             first_appearance = next(
                 launcher
                 for launcher, dlls in all_dll_paths.items()

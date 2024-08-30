@@ -5,12 +5,11 @@ from dlss_updater.config import LATEST_DLL_VERSION, LATEST_DLL_PATH
 from pathlib import Path
 import stat
 import psutil
-import asyncio
+import time
 from packaging import version
 
 
 def parse_version(version_string):
-    # Replace commas with dots and remove any trailing zeros
     cleaned_version = ".".join(version_string.replace(",", ".").split(".")[:3])
     return version.parse(cleaned_version)
 
@@ -61,7 +60,7 @@ def normalize_path(path):
     return os.path.normpath(path)
 
 
-async def update_dll(dll_path, latest_dll_path):
+def update_dll(dll_path, latest_dll_path):
     dll_path = Path(normalize_path(dll_path)).resolve()
     latest_dll_path = Path(normalize_path(latest_dll_path)).resolve()
     print(f"Checking DLL at {dll_path}...")
@@ -74,11 +73,14 @@ async def update_dll(dll_path, latest_dll_path):
             existing_parsed = parse_version(existing_version)
             latest_parsed = parse_version(latest_version)
 
-            print(f"Existing version: {existing_version}, Latest version: {latest_version}")
+            print(
+                f"Existing version: {existing_version}, Latest version: {latest_version}"
+            )
 
-            # Check if the DLSS DLL version is less than 2
             if existing_parsed < parse_version("2.0.0"):
-                print(f"Skipping update for {dll_path}: Version {existing_version} is less than 2.0.0 and cannot be updated.")
+                print(
+                    f"Skipping update for {dll_path}: Version {existing_version} is less than 2.0.0 and cannot be updated."
+                )
                 return False
 
             if existing_parsed >= latest_parsed:
@@ -87,46 +89,39 @@ async def update_dll(dll_path, latest_dll_path):
             else:
                 print(f"Update needed: {existing_version} -> {latest_version}")
 
-        # Check if the target path exists
         if not dll_path.exists():
             print(f"Error: Target DLL path does not exist: {dll_path}")
             return False
 
-        # Check if the latest DLL path exists
         if not latest_dll_path.exists():
             print(f"Error: Latest DLL path does not exist: {latest_dll_path}")
             return False
 
-        # Ensure the target directory is writable
         if not os.access(dll_path.parent, os.W_OK):
             print(f"Error: No write permission to the directory: {dll_path.parent}")
             return False
 
-        # Remove read-only attribute if set
         remove_read_only(dll_path)
 
-        # Check if the file is in use and retry if necessary
         retry_count = 5
-        retry_interval = 2  # seconds
-        while await asyncio.to_thread(is_file_in_use, dll_path) and retry_count > 0:
+        retry_interval = 2
+        while is_file_in_use(dll_path) and retry_count > 0:
             print(f"File {dll_path} is in use. Retrying in {retry_interval} seconds...")
-            await asyncio.sleep(retry_interval)
+            time.sleep(retry_interval)
             retry_count -= 1
 
-        if retry_count == 0 and await asyncio.to_thread(is_file_in_use, dll_path):
+        if retry_count == 0 and is_file_in_use(dll_path):
             print(
                 f"File {dll_path} is still in use after multiple attempts. Cannot update."
             )
             return False
 
-        # Copy the latest DLL to the target path
         print(f"Copying {latest_dll_path} to {dll_path}")
-        await asyncio.to_thread(shutil.copyfile, latest_dll_path, dll_path)
+        shutil.copyfile(latest_dll_path, dll_path)
         print(
             f"Updated {dll_path} from version {existing_version} to {latest_version}."
         )
 
-        # Set the read-only attribute back
         set_read_only(dll_path)
         return True
     except Exception as e:

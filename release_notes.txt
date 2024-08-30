@@ -30,3 +30,6 @@ Minor update note fixes.
 
 Version 1.5.2:
 Add exclusion for DLSS DLL's which are less than 2.0.
+
+Version 1.5.3:
+Remove async integration, has too many deadlock situations, revert code integration.

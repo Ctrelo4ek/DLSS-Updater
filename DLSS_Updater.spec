@@ -20,8 +20,7 @@ a = Analysis(
         ('release_notes.txt', '.')
     ],
     hiddenimports=[
-        'pefile', 'psutil', 'importlib.metadata', 'packaging', 'importlib_metadata',
-        'asyncio', 'concurrent.futures'
+        'pefile', 'psutil', 'importlib.metadata', 'packaging', 'importlib_metadata'
     ] + dlss_updater_imports,
     hookspath=['./hooks'],
     hooksconfig={},

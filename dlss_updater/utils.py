@@ -90,7 +90,7 @@ def process_single_dll_with_backup(dll_path, launcher, backup_path, progress_tra
         return False, None, "Error"
 
 
-def process_dlls_parallel(dll_tasks, max_workers=16, progress_signal=None):
+def process_dlls_parallel(dll_tasks, max_workers=32, progress_signal=None):
     """Process DLLs using a thread pool with progress tracking"""
     results = {
         "updated_games": [],
@@ -274,7 +274,14 @@ def extract_game_name(dll_path, launcher_name):
         elif "Epic Games" in parts:
             return parts[parts.index("Epic Games") + 2]
         elif "GOG Galaxy" in parts:
-            return parts[parts.index("Games") + 1]
+            gog_index = parts.index("GOG Galaxy")
+            if "Games" in parts:
+                # Pattern: D:\GOG Galaxy\Games\<GameName>\...
+                return parts[parts.index("Games") + 1]
+            else:
+                # Pattern: D:\GOG Galaxy\<GameName>\...
+                if gog_index + 1 < len(parts):
+                    return parts[gog_index + 1]
         elif "Battle.net" in parts:
             return parts[parts.index("Battle.net") + 1]
         elif "Custom Path" in launcher_name:
@@ -413,6 +420,10 @@ def process_single_dll(dll_path, launcher):
             dll_type = "Streamline Parameter/Platform Configuration DLL"
         elif "sl.reflex.dll" == dll_name:
             dll_type = "Streamline Reflex Low-Latency DLL"
+        elif "amd_fidelityfx_vk.dll" == dll_name:
+            dll_type = "AMD FidelityFX Super Resolution (FSR) Vulkan DLL"
+        elif "amd_fidelityfx_dx12.dll" == dll_name:
+            dll_type = "AMD FidelityFX Super Resolution (FSR) DirectX 12 DLL"
         else:
             dll_type = "Unknown DLL type"
 

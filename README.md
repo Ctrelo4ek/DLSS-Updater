@@ -8,7 +8,7 @@
 
 ![dlss_updater](https://github.com/user-attachments/assets/b7d7fb4d-e204-412d-8e92-61a7173abfaf)
 
-What if you could update all the DLSS/XeSS DLLs for the games detected on your system?
+What if you could update all the DLSS/XeSS/FSR DLLs for the games detected on your system?
 ## Features
 
 - Supports updating games from the following launchers:
@@ -21,12 +21,13 @@ What if you could update all the DLSS/XeSS DLLs for the games detected on your s
   - Battle.net (Note for Battle.net: Please ensure that the launcher is **open** before updating this launcher (this does not apply if you are entering a custom folder))
 - A soft backup system for allowing restoration with [DLSS Swapper](https://github.com/beeradmoore/dlss-swapper).
 - Support for updating Ray Reconstruction/Frame Generation/Streamline (Reflex Low Latency etc) DLL's.
-- Support for updating XeSS and DirectStorage DLL's.
+- Support for updating XeSS/FSR/DirectStorage DLL's.
 - A GUI!
 - Support for manual folder locations.
 
 
-The current supported DLL included is DLSS 4.
+The current supported DLL included is DLSS 4 (version 3.10.4).
+The current supported DLL included is FSR 4 (version 4.0.2.0).
 The current supported XESS DLL included is 2.0.1, please see the limitations [here](https://github.com/intel/xess/releases/tag/v2.0.1) for game support.
 
 ## GUI
@@ -59,6 +60,10 @@ The games that are blacklisted can be disabled manually by clicking the "Manage 
 3. Navigate to the `dist/DLSS_Updater` directory.
 4. Run the `DLSS_Updater.exe` executable as an administrator.
 5. The program will now boot.
+
+## Winget
+
+1. Download DLSS Updater using ``winget install DLSS Updater``.
 
 ## Chocolatey
 
